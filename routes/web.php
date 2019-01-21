@@ -25,7 +25,17 @@ Route::group(['middleware' => 'auth'],function(){
 
 	//需要邮箱验证判断
 	Route::group(['middleware' => 'email_verified'],function(){
-		
+		//收货地址列表
+		Route::get('user_addresses', 'UserAddressesController@index')->name('user_addresses.index');
+   		//创建收货地址
+   		Route::get('user_addresses/create', 'UserAddressesController@create')->name('user_addresses.create');
+  		//保存收获地址
+  		Route::post('user_addresses', 'UserAddressesController@store')->name('user_addresses.store');
+  		// 修改收货地址
+  		Route::get('user_addresses/{user_address}', 'UserAddressesController@edit')->name('user_addresses.edit');
+ 		Route::put('user_addresses/{user_address}', 'UserAddressesController@update')->name('user_addresses.update');
+		Route::delete('user_addresses/{user_address}', 'UserAddressesController@destroy')->name('user_addresses.destroy');
+   
 	});
    
     
