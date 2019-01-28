@@ -18,7 +18,7 @@ class CartController extends Controller
     }
     public function add(AddCartRequest $request)
     {
-    	$this->cartService->add($requet->input('sku_id'),$request->input('amount'));
+    	$this->cartService->add($request->input('sku_id'),$request->input('amount'));
 
     	return [];
     }
@@ -29,11 +29,6 @@ class CartController extends Controller
         $addresses = $request->user()->addresses()->orderBy('last_used_at', 'desc')->get();
 
         return view('cart.index', ['cartItems' => $cartItems, 'addresses' => $addresses]);
-    }
-
-    public function remove(ProductSku $sku, Request $request)
-    {
-    	$request->user()->cartItems()->where('product_sku_id', $sku->id)->delete();
     }
 
     public function remove(ProductSku $productSku, Request $request)

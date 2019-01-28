@@ -58,7 +58,7 @@ class OrdersController extends Controller
     		$order->update(['total_amount' => $totalAmount]);
 
     		$skuID = collect($items)->pluck('sku_id');
-    		$cartService->remove($skuIds);
+    		$cartService->remove($skuID);
             return $order;
     	});
         $this->dispatch(new CloseOrder($order, config('app.order_ttl')));//dispatch 调度
