@@ -34,5 +34,25 @@ class User extends Authenticatable
     public function addresses()
     {
         return $this->hasMany(UserAddress::class, 'user_id', 'id');
+    } 
+    /**
+     *收藏的商品
+     * 
+     * [favoriteProducts description]
+     * @return [type] [description]
+     */
+    public function favoriteProducts()
+    {
+        return $this->belongsToMany(Product::class,'user_favorite_products','user_id','product_id')
+        ->withTimestamps()
+        ->orderBy('user_favorite_products.created_at','desc');
+    }
+    /**
+     * 购物车中的商品
+     * @return [type] [description]
+     */
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class, 'user_id', 'id');
     }
 }

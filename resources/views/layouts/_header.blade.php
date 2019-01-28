@@ -23,6 +23,9 @@
 					<li><a href="{{ route('login') }}">登录</a></li>
 	                <li><a href="{{ route('register') }}">注册</a></li>
                 @else
+                <li>
+                    <a href="{{ route('cart.index') }}"><span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span></a>
+                </li>
                 <li class="dropdown">
                 	<a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aira-expanded="false">
                 		<span class="user-avatar pull-left" style="margin-right:8px; margin-top:-5px;">    <!--  responsive  响应 -->
@@ -31,15 +34,26 @@
                 		{{ Auth::user()->name }} <span class="caret"></span>
                 	</a>
                 	<ul class="dropdown-menu" role="menu">
+
+                		<li>
+    							<a href="{{ route('products.favorites') }}">我的收藏</a>
+  						</li>
                 		<li>
                 			<a href="{{ route('user_addresses.index') }}">收货地址</a>
-                			<a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                				退出登录
-                			</a>
-                			<form action="{{ route('logout') }}" id="logout-form" method="POST" style="display: none;">
-                				{{ csrf_field() }}
-                			</form>
-                		</li>
+                        </li>
+                        <li>
+                            <a href="{{ route('orders.index') }}">我的订单</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                退出登录
+                            </a>
+                            <form action="{{ route('logout') }}" id="logout-form" method="POST" style="display: none;">
+                                {{ csrf_field() }}
+                            </form>
+                        </li>
+                			
+                		
                 	</ul>
                 </li>
                 @endguest
