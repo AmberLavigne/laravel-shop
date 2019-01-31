@@ -18,5 +18,9 @@ Route::group([
     $router->get('products/{id}/edit','ProductsController@edit');
     $router->put('products/{id}', 'ProductsController@update');
     $router->delete('products/{id}', 'ProductsController@destroy');
+    $router->get('orders', 'OrdersController@index')->name('admin.orders.index');
+    $router->get('orders/{order}', 'OrdersController@show')->name('admin.orders.show');
+    //订单发货
+    $router->post('orders/{order}/ship', 'OrdersController@ship')->name('admin.orders.ship');
 
 });
