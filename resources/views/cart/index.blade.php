@@ -72,6 +72,18 @@
       </div>
     </div>
     <div class="form-group">
+      <label for="" class="control-lable col-sm-3">优惠码</label>
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="coupon_code">
+        <span class="help-block" id="coupon_desc"></span>
+      </div>
+      <div class="col-sm-3">
+        <button type="button" class="btn btn-success" id="btn-check-coupon">检查</button>
+        <button type="button" class="btn btn-danger" style="display: none;" id="btn-cancel-coupon">取消</button>
+      </div>
+      
+    </div>
+    <div class="form-group">
       <div class="col-sm-offset-3 col-sm-3">
         <button type="button" class="btn btn-primary btn-create-order">提交订单</button>
       </div>
@@ -88,6 +100,36 @@
 @section('scriptsAfterJs')
   <script>
     $(document).ready(function(){
+
+      $("#btn-check-coupon").click(function(){
+        var code = $("input[name=coupon_code]").val();
+        if (! code) {
+          swal('请输入优惠码', '', 'warning');
+          return;favicon.ico
+        }
+
+        axios.get('/coupon_codes/' + encodeURIComponent(code)).then(function(response){
+          $("#coupon_desc").text(response.data.description);
+          $("input[name=coupon_code]").prop('readonly',true);
+          $("#btn-cancel-coupon").show();
+          $('#btn-check-coupon').hide();
+
+        },function(error){
+          if (error.response.status === 404) {
+             swal('优惠码不存在', '', 'error');
+           } else if (error.response.status === 403){
+            swal(error.response.data.msg,'','error');
+           } else {
+            swal('系统内部错误','','error');
+           }
+        });
+      });
+      $('#btn-cancel-coupon').click(function () {
+          $('#coupon_desc').text(''); // 隐藏优惠信息
+          $('input[name=coupon_code]').prop('readonly', false);  // 启用输入框
+          $('#btn-cancel-coupon').hide(); // 隐藏 取消 按钮
+          $('#btn-check-coupon').show(); // 显示 检查 按钮
+      });
       $('.btn-remove').click(function(){
 
         var id = $(this).closest('tr').data('id');
@@ -125,6 +167,7 @@
           address_id: $('#order-form').find('select[name=address]').val(),
           items: [],
           remark: $('#order-form').find('textarea[name=remark]').val(),
+          coupon_code: $('input[name=coupon_code]').val(),
         };
         $('table tr[data-id]').each(function(){
             var checkbox = $(this).find('input[name=select][type=checkbox]');
@@ -164,6 +207,8 @@
             });
             html += '</div>';
             swal({content: $(html)[0], icon: 'error'})
+          } else if(error.response.status === 403){
+              swal(error.response.data.msg, '', 'error');
           } else {
             // 其他情况应该是系统挂了
             swal('系统错误', '', 'error');

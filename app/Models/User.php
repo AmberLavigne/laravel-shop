@@ -36,7 +36,7 @@ class User extends Authenticatable
         return $this->hasMany(UserAddress::class, 'user_id', 'id');
     } 
     /**
-     *收藏的商品
+     * 收藏的商品
      * 
      * [favoriteProducts description]
      * @return [type] [description]

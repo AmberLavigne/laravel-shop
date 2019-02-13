@@ -8,61 +8,133 @@ use App\Models\Order;
 use App\Models\ProductSku;
 use App\Jobs\CloseOrder;
 use App\Services\CartService;
+use App\Exceptions\InvalidRequestException;
+use App\Http\Requests\SendReviewRequest;
+use App\Events\OrderReviewed;
+use App\Http\Requests\ApplyRefundRequest;
+
+use App\Exceptions\CouponCodeUnavailableException;
+use App\Models\CouponCode;
+use App\Services\OrderService;
+use App\Models\UserAddress;
+
+use Illuminate\Support\Str;
 class OrdersController extends Controller
-{
-    public function store(Request $request, CartService $cartService)
+{   
+    /**
+     * 提交申请
+     * @param  Order              $order   [description]
+     * @param  ApplyRefundRequest $request [description]
+     * @return [type]                      [description]
+     */
+    public function applyRefund(Order $order, ApplyRefundRequest $request)
+    {
+        $this->authorize('own', $order);
+
+        if (! $order->paid_at) {
+            throw new InvalidRequestException('该订单未支付，不可退款');
+        }
+
+        if ($order->refund_status !== Order::REFUND_STATUS_PENDING) {
+            throw new InvalidRequestException('该订单已经申请过退款，请勿重复申请');
+        }
+        $extra = $order->extra ?: [];
+        $extra['refund_reason']  = $request->input('reason');
+
+        $order->update([
+            'refund_status' => Order::REFUND_STATUS_APPLIED,
+            'extra' => $extra,
+        ]);
+
+        return $order;
+    }
+    /**
+     * 评价列表
+     * @param  Order  $order [description]
+     * @return [type]        [description]
+     */
+    public function review(Order $order)
+    {
+        $this->authorize('own', $order);
+
+        if (! $order->paid_at) {
+            throw new InvalidRequestException('该订单未支付，不可评价');
+        }
+
+        return  view('orders.review',['order' => $order->load(['items.productSku','items.product'])]);
+    }
+    /**
+     * 开始评论
+     * @param  Order             $order   [description]
+     * @param  SendReviewRequest $request [description]
+     * @return [type]                     [description]
+     */
+    public function sendReview(Order $order, SendReviewRequest $request)
+    {
+         $this->authorize('own', $order);
+
+         if (!$order->paid_at) {
+            throw new InvalidRequestException('该订单未支付，不可评价');
+        }
+        // 判断是否已经评价
+        if ($order->reviewed) {
+            throw new InvalidRequestException('该订单已评价，不可重复提交');
+        }
+        
+        $reviews = $request->input('reviews');
+
+        \DB::transaction(function() use($reviews, $order) {
+            foreach($reviews as $review){
+                $orderItem = $order->items()->find($review['id']);
+
+                $orderItem->update([
+                    'rating'      => $review['rating'],
+                    'review'      => $review['review'],
+                    'reviewed_at' => Carbon::now(),
+                ]);
+            }
+
+            $order->update(['reviewed' => true]);
+            event(new OrderReviewed($order));
+        });
+
+        return redirect()->back();   
+    }
+    /**
+     * 用户确认收货
+     * @param  Order   $order   [description]
+     * @param  Request $request [description]
+     * @return [type]           [description]
+     */
+    public function received(Order $order, Request $request)
+    {
+        $this->authorize('own', $order);
+
+
+        if ($order->ship_status !== Order::SHIP_STATUS_DELIVERED) {
+            throw new InvalidRequestException('发货状态不正确');
+        }
+
+        $order->update(['ship_status' => Order::SHIP_STATUS_RECEIVED]);
+
+        // return redirect()->back();
+        return $order;
+    }
+    public function store(Request $request, OrderService $orderService)
     {
     	$user = $request->user();
 
-    	$order = \DB::transaction(function() use($request, $user, $cartService){
+    	$address = UserAddress::find($request->input('address_id'));
+        $coupon  = null;
 
-    		$address = $user->addresses()->find($request->input('address_id'));
-
-    		$address->update(['last_used_at' => Carbon::now()]);
-
-    		$order = new Order([
-    			'address'      => [ // 将地址信息放入订单中
-                    'address'       => $address->full_address,
-                    'zip'           => $address->zip,
-                    'contact_name'  => $address->contact_name,
-                    'contact_phone' => $address->contact_phone,
-                ],
-                'remark'       => $request->input('remark'),
-                'total_amount' => 0,
-    		]);
-
-    		$order->user()->associate($user);
-    		$order->save();
-
-    		$totalAmount = 0;
-    		$items = $request->input('items');
-
-    		foreach ($items  as $data) {
-    			$sku = ProductSku::find($data['sku_id']);
-
-    			$item = $order->items()->make([
-    				'amount' => $data['amount'],
-                    'price'  => $sku->price,
-    			]);
-
-    			$item->product()->associate($sku->product_id);
-    			$item->productSku()->associate($sku);
-    			$item->save();
-
-    			$totalAmount += $sku->price * $data['amount']; 
-    			if ($sku->decreaseStock($data['amount']) <= 0) {
-        			throw new InvalidRequestException('该商品库存不足');
-    			}
-    		}
+        if ($code = $request->input('coupon_code')) {
+            $coupon = CouponCode::where('code', $code)->first();
+            if (!$coupon) {
+                throw new CouponCodeUnavailableException('优惠券不存在');
+            }
+        }
         
-    		$order->update(['total_amount' => $totalAmount]);
-
-    		$skuID = collect($items)->pluck('sku_id');
-    		$cartService->remove($skuID);
-            return $order;
-    	});
-        $this->dispatch(new CloseOrder($order, config('app.order_ttl')));//dispatch 调度
-        return $order;
+        return  $orderService->store($user, $address, $request->input('remark'), $request->input('items'), $coupon);
     }
     /**
      * 订单列表
@@ -78,7 +150,12 @@ class OrdersController extends Controller
     }
 
     public function show(Order $order,Request $request){
+
         $this->authorize('own', $order);
+        //$order->load(['items.productSku', 'items.product']);
+         //$order= Order::query()->with('items')->first();
+        //dd(Str::after('UYWfbennefvrer','f'));
         return view('orders.show', ['order' => $order->load(['items.product','items.productSku'])]);
+
     }
 }
