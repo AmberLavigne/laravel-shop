@@ -10,6 +10,8 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
 
+use App\Models\Category;
+
 class ProductsController extends Controller
 {
     use HasResourceActions;
@@ -80,11 +82,17 @@ class ProductsController extends Controller
     protected function grid()
     {
         $grid = new Grid(new Product);
+        $grid->model()->with(['category']);
 
         $grid->id('Id')->sortable();
+        $grid->column('category.name',  '类目');
         $grid->title('商品名称');
-        $grid->description('Description');
-        $grid->image('Image');
+        $grid->description('Description')->display(function($description){
+            return str_limit($description,20,'...');
+        });
+        $grid->image('Image')->display(function($image){
+            return "<img  src='{$image}' class='thumbnail' style='max-width: 30px;' />";
+        });
         $grid->on_sale('已上架')->display(function($value){
             return $value ? '是' : '否';
         });
@@ -141,6 +149,17 @@ class ProductsController extends Controller
         $form = new Form(new Product);
 
         $form->text('title', '商品名称')->rules('required');
+
+        $form->select('category_id', '类目')->options(function($id){
+            $category = Category::find($id);
+
+            if ($category){
+
+                return [$category->id => $category->full_name];
+            }
+        })->ajax('/admin/api/categories?is_directory=0');
+
+
         $form->image('image', '封面图片')->rules('required|image');
         $form->editor('description', '商品描述')->rules('required');
        
