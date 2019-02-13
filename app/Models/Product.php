@@ -21,6 +21,15 @@ class Product extends Model
     	return $this->hasMany(ProductSku::class,'product_id', 'id');
     }
 
+    /**
+     * 商品分类
+     *
+     * @return mixed
+     */
+    public function category()
+    {
+       return $this->belongsTo(Category::class , 'category_id' , 'id');
+    }
     public function getImageUrlAttribute()
     {
         if (Str::startsWith($this->attributes['image'],['http://', 'https://'])) {
