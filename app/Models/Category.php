@@ -18,12 +18,12 @@ class Category extends Model
 
         static::creating(function (Category $category){
 
-            if (is_null($this->parent_id)){
+            if (is_null($category->parent_id)){
                 $category->level = 0;
                 $category->path = '-';
             } else {
-                $category->level = $this->parent->level+1;
-                $category->path = $category->parent->path . $this->parent->id . '-';
+                $category->level = $category->parent->level+1;
+                $category->path = $category->parent->path . $category->parent_id . '-';
             }
         });
     }
