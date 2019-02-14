@@ -7,7 +7,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\OrderItem;
 use App\Exceptions\InvalidRequestException;
-use DB;
+
 class ProductsController extends Controller
 {
     public function index(Request $request)

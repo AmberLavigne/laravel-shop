@@ -11,12 +11,22 @@
 				Shop
 			</a>
 		</div>
-		<!-- collapse 崩溃 -->
+		<!-- -->
 		<div class="collapse navbar-collapse" id="app-navbar-collapse">
-			<ul class="nav  navbar-nav">
-				
+			<ul class="nav  navbar-nav mr-auto">
+				@if(isset($categoryTree))
+					<li class="nav-item dropdown">
+						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="categoryTree">
+							所有类目
+							<b class="caret"></b>
+							<ul class="dropdown-menu" aria-labelledby="categoryTree">
+								@each('layouts._category_item', $categoryTree, 'category')
+							</ul>
+						</a>
+					</li>
+				@endif
 			</ul>
-			<!-- 登录注册链接开始  dropdown 下拉  toggle 切换  expanded 扩大-->
+			<!-- 登录注册链接开始    collapse 崩溃  dropdown 下拉  toggle 切换  expanded 扩大  has popup 有 弹出-->
 
 			<ul class="nav navbar-nav navbar-right">
 				@guest
