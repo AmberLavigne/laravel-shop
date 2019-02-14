@@ -9,6 +9,30 @@
     <!-- filter start -->
       <div class="row">
         <form action="{{ route('products.index') }}" method='GET' class="form-inline search-form">
+
+          <div class="form-row">
+            <div class="col-md-6">
+              <div class="form-row">
+                <div class="col-auto category-breadcrumb">
+                  <a href="{{ route('products.index') }}"  class="all-products">全部</a>
+                  @if($category)
+                    @foreach($category->ancestors as $ancestor)
+                      <span class="category">
+                        <a href="{{ route('products.index', ['category_id' => $ancestor->id]) }}">
+                          {{ $ancestor->name }}
+                        </a>
+                      </span>
+                      <span>&gt;</span>
+                    @endforeach
+                      <span class="category">{{ $category->name }}</span>
+                      <input type="hidden" name="category_id" value="{{ $category->id }}">
+                  @endif
+                </div>
+              </div>
+            </div>
+          </div>
+
+
           <input type="text" class="form-control input-sm" name='search' placeholder="search">
           <button class="btn btn-primary btn-sm">Search</button>
           <select name="order" class="form-control input-sm pull-right" id="">
@@ -22,6 +46,21 @@
           </select>
         </form>
       </div>
+
+    <div class="filters">
+      <!-- 如果当前是通过类目筛选，并且此类目是一个父类目 -->
+      @if ($category && $category->is_directory)
+        <div class="row">
+          <div class="col-3  col-md-3 filter-key">子类目：</div>
+          <div class="col-9  col-md-9 filter-values">
+            <!-- 遍历直接子类目 -->
+            @foreach($category->children as $child)
+              <a href="{{ route('products.index', ['category_id' => $child->id]) }}">{{ $child->name }}</a>
+            @endforeach
+          </div>
+        </div>
+      @endif
+    </div>
     <!-- filter end -->
     <div class="row products-list">
       @foreach($products as $product)
