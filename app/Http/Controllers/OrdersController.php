@@ -18,9 +18,27 @@ use App\Models\CouponCode;
 use App\Services\OrderService;
 use App\Models\UserAddress;
 
+use App\Http\Requests\CrowdFundingOrderRequest;
+
 use Illuminate\Support\Str;
 class OrdersController extends Controller
-{   
+{
+
+    /**
+     * 接受众筹商品下单请求
+     *
+     * @param CrowdFundingOrderRequest $request
+     * @param OrderService $orderService
+     */
+    public function crowdfunding(CrowdFundingOrderRequest $request, OrderService $orderService)
+    {
+        $user = $request->user();
+        $address = UserAddress::find($request->input('address_id'));
+        $sku = ProductSku::find($request->input('sku_id'));
+        $amount = $request->input('amount');
+
+        return $orderService->crowdfunding($user, $address, $sku, $amount);
+    }
     /**
      * 提交申请
      * @param  Order              $order   [description]
