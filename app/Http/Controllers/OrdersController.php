@@ -40,7 +40,7 @@ class OrdersController extends Controller
         return $orderService->crowdfunding($user, $address, $sku, $amount);
     }
     /**
-     * 提交申请
+     * 提交申请退款
      * @param  Order              $order   [description]
      * @param  ApplyRefundRequest $request [description]
      * @return [type]                      [description]
@@ -51,6 +51,10 @@ class OrdersController extends Controller
 
         if (! $order->paid_at) {
             throw new InvalidRequestException('该订单未支付，不可退款');
+        }
+        // 众筹订单不允许申请退款
+        if ($order->type === Order::TYPE_CROWDFUNDING) {
+            throw new InvalidRequestException('众筹订单不支持退款');
         }
 
         if ($order->refund_status !== Order::REFUND_STATUS_PENDING) {
