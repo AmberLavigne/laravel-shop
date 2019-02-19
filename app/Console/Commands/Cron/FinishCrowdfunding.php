@@ -48,9 +48,9 @@ class FinishCrowdfunding extends Command
             ->get()
             ->each(function(CrowdfundingProduct $crowdfundingProduct){
                 if ($crowdfundingProduct->target_amount > $crowdfundingProduct->total_amount){
-                    $this->crowdfundingFailed($crowdfunding);
+                    $this->crowdfundingFailed($crowdfundingProduct);
                 } else {
-                    $this->crowdfundingSucceed($crowdfunding);
+                    $this->crowdfundingSucceed($crowdfundingProduct);
                 }
             });
     }
