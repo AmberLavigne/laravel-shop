@@ -22,13 +22,12 @@
             </div>
             <div class="progress">
               <div class="progress-bar progress-bar-success"
-                role="progressbar"
+                   role="progressbar"
                    aria-valuenow="{{ $product->crowdfunding->percent }}"
                    aria-valuemin="0"
                    aria-value-max="100"
-                   style="min-width:1em; witdh:{{ min($product->crowdfunding->percent, 100) }}%"
+                   style="min-width:1em; width:{{ min($product->crowdfunding->percent, 100) }}%"
               >
-
               </div>
             </div>
             <div class="progress-info">
@@ -192,7 +191,7 @@
 
             axios.post('{{ route('crowdfunding_orders.store') }}', rep).then(function(response){
                 swal('订单提交成功', '', 'success').then(function(){
-                    locations.reload = '/orders/' + response.data.id;
+                    location.href = '/orders/' + response.data.id;
                 });
             },function(error){
                 console.log(error.response);
