@@ -6,7 +6,7 @@
 	<div class="panel panel-default">
 		<div class="panel-heading">操作成功</div>
 		<div class="panel-body text-center">
-			<h3>{{ $msg }}</h1>
+			<h3>{{ $msg }}</h3>
 			<a href="{{ route('products.index') }}" class="btn btn-primary btn-sm">返回首页</a>
 		</div>
 	</div>
