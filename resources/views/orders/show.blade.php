@@ -104,6 +104,12 @@
         @if(! $order->paid_at  && ! $order->closed)
           <div class="payment-buttons">
             <a href="{{ route('payment.alipay', ['order' => $order->id]) }}" class="btn btn-primary btn-sm" >支付宝支付</a>
+            <!-- 分期支付按钮开始 -->
+            <!-- 仅当订单总金额大等于分期最低金额时才展示分期按钮 -->
+            @if ($order->total_amount >= config('app.min_installment_amount'))
+              <button class="btn btn-sm btn-info" id='btn-installment'>分期付款</button>
+          @endif
+          <!-- 分期支付按钮结束 -->
           </div>
         @endif
 
@@ -129,9 +135,59 @@
 </div>
 </div>
 </div>
+<!-- 分期弹框开始 -->
+<div class="modal fade" id="installment-modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aira-hidden='true'>×</span></button>
+        <h4 class="modal-title">选择分期期数</h4>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped table-bordered text-center">
+          <thead>
+          <tr>
+            <th class="text-center">期数</th>
+            <th class="text-center">费率</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          @foreach(config('app.installment_fee_rate') as $count => $rate)
+            <tr>
+              <td>{{ $count }}期</td>
+              <td>{{ $rate }}%</td>
+              <td>
+                <button class="btn btn-sm btn-primary btn-select-installment" data-count="{{ $count }}">选择</button>
+              </td>
+            </tr>
+          @endforeach
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 分期弹框end -->
 @endsection
 @section('scriptsAfterJs')
   <script>
+
+      // 分期付款按钮点击事件
+      $('#btn-installment').click(function () {
+          // 展示分期弹框
+          $('#installment-modal').modal();
+      });
+
+      $('.btn-select-installment').click(function(){
+          axios.post('{{ route('payment.installment', ['order' => $order->id]) }}', { count: $(this).data('count') }).then(function(response){
+              console.log(response.data);
+              location.href =  '/installments/' + response.data.id;
+          });
+      });
     $(document).ready(function(){
       $("#btn-apply-refund").click(function(){
         swal({

@@ -15,8 +15,8 @@ if (! function_exists('route_class')) {
 }
 
 if (! function_exists('big_number')) {
-    function big_number($number, $scale)
+    function big_number($number, $scale = 2)
     {
-        return \Moontoast\Math\BigNumber($number, $scale);
+        return  new \Moontoast\Math\BigNumber($number, $scale);
     }
 }
