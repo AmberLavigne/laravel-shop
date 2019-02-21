@@ -39,6 +39,23 @@ class Product extends Model
     }
 
     /**
+     * 商品属性
+     * @return mixed
+     */
+    public function properties()
+    {
+        return $this->hasMany(ProductProperty::class, 'product_id', 'id');
+    }
+
+    public function getGroupedPropertiesAttribute()
+    {
+        return $this->properties
+            ->groupBy('name')
+            ->map(function($properties){
+                return $properties->pluck('value')->all();
+            });
+    }
+    /**
      * 商品分类
      *
      * @return mixed
