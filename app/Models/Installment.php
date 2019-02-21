@@ -66,4 +66,27 @@ class Installment extends Model
             return false;
         }
     }
+
+    /**
+     * 分期付款是否全部end
+     */
+    public function refreshRefundStatus()
+    {
+        $allSuccess = true;
+
+        $this->load(['items']);
+
+        foreach($this->items as $item){
+            if ($item->paid_at && $item->refund_status !== InstallmentItem::REFUND_STATUS_SUCCESS) {
+                $allSuccess = false;
+                break;
+            }
+        }
+
+        if ($allSuccess) {
+            $this->order->update([
+                'refund_status' => Order::REFUND_STATUS_SUCCESS,
+            ]);
+        }
+    }
 }
