@@ -187,6 +187,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\PayServiceProvider::class,
         App\Providers\ViewServiceProvider::class,
+        App\Providers\EsServiceProvider::class,
 
     ],
 
