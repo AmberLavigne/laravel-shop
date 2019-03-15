@@ -120,6 +120,50 @@ class ProductsController extends Controller
             }
 
         }
+        // 只有当用户有输入搜索词或者使用了类目筛选的时候才会做聚合
+        if ($search || isset($category)) {
+            $params['body']['aggs'] = [
+                'properties' => [
+                    'nested' => [
+                        'path' => 'properties',
+                    ],
+                    'aggs'   => [
+                        'properties' => [
+                            'terms' => [
+                                'field' => 'properties.name',
+                            ],
+                            'aggs'  => [
+                                'value' => [
+                                    'terms' => [
+                                        'field' => 'properties.value',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        }
+        $propertyFilters = [];
+        // 从用户请求参数获取 filters
+        if($filterString = $request->input('filters')) {
+            $filterArray = explode('|',$filterString);
+            foreach($filterArray as $filter) {
+                list($name,$value) = explode(':', $filter);
+                $propertyFilters[$name] = $value;
+                $params['body']['query']['bool']['filter'][] = [
+                    // 由于我们要筛选的是 nested 类型下的属性，因此需要用 nested 查询
+                    'nested' => [
+                        // 指明 nested 字段
+                        'path'  => 'properties',
+                        'query' => [
+                            ['term' => ['properties.name' => $name]],
+                            ['term' => ['properties.value' => $value]],
+                        ],
+                    ],
+                ];
+            }
+        }
         $result = app('es')->search($params);
 
         // 通过 collect 函数将返回结果转为集合，并通过集合的 pluck 方法取到返回的商品 ID 数组
@@ -133,7 +177,19 @@ class ProductsController extends Controller
         $pager = new LengthAwarePaginator($products, $result['hits']['total'], $perPage, $page, [
             'path' => route('products.index', false), // 手动构建分页的 url
         ]);
-        //return $pager;
+        $properties = [];
+        // 如果返回结果里有 aggregations 字段，说明做了分面搜索
+        if (isset($result['aggregations'])) {
+            $properties = collect($result['aggregations']['properties']['properties']['buckets'])
+                ->map(function($bucket){
+                    return [
+                        'key' => $bucket['key'],
+                        'values' => collect($bucket['value']['buckets'])->pluck('key')->all()
+                    ];
+                })->filter(function ($property) use($propertyFilters){
+                    return count($property['values']) >1 && !isset($propertyFilters[$property['key']]);
+                });
+        }
         return view('products.index', [
             'products' => $pager,
             'filters'  => [
@@ -141,6 +197,8 @@ class ProductsController extends Controller
                 'order'  => $order,
             ],
             'category' => $category ?? null,
+            'properties' => $properties,
+            'propertyFilters' => $propertyFilters,
         ]);
     }
 
