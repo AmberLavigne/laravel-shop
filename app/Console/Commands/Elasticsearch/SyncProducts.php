@@ -5,6 +5,7 @@ namespace App\Console\Commands\Elasticsearch;
 
 use App\Models\Product;
 use Illuminate\Console\Command;
+use DB;
 
 class SyncProducts extends Command
 {
@@ -49,8 +50,8 @@ class SyncProducts extends Command
                 $req = ['body' => []];
 
                 foreach($products as $product){
-                    $data = $product->toESArray();
 
+                    $data = $product->toESArray();
                     $req['body'][] = [
                         'index' => [
                             '_index' => 'products',
