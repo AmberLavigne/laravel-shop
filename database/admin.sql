@@ -21,7 +21,7 @@
 
 LOCK TABLES `admin_menu` WRITE;
 /*!40000 ALTER TABLE `admin_menu` DISABLE KEYS */;
-INSERT INTO `admin_menu` VALUES (1,0,1,'首页','fa-bar-chart','/',NULL,'2019-01-18 10:13:01'),(2,0,6,'系统管理','fa-tasks',NULL,NULL,'2019-02-01 06:41:58'),(3,2,7,'管理员','fa-users','auth/users',NULL,'2019-02-01 06:41:58'),(4,2,8,'角色','fa-user','auth/roles',NULL,'2019-02-01 06:41:58'),(5,2,9,'权限','fa-ban','auth/permissions',NULL,'2019-02-01 06:41:58'),(6,2,10,'菜单','fa-bars','auth/menu',NULL,'2019-02-01 06:41:58'),(7,2,11,'日志','fa-history','auth/logs',NULL,'2019-02-01 06:41:58'),(8,0,2,'用户管理','fa-users','/users','2019-01-18 10:28:43','2019-01-18 10:28:54'),(9,0,3,'商品管理','fa-cubes','/products','2019-01-21 01:37:59','2019-01-21 01:39:12'),(10,0,4,'订单管理','fa-rmb','/orders','2019-01-30 11:29:24','2019-01-30 11:29:44'),(11,0,5,'优惠券管理','fa-tags','/coupon_codes','2019-02-01 06:41:23','2019-02-01 06:41:58'),(12,9,0,'众筹商品','fa-cubes','/crowdfunding_products','2019-02-18 11:04:34','2019-02-18 11:04:34'),(13,9,0,'普通商品','fa-linux','/products','2019-02-18 11:05:39','2019-02-18 11:05:39');
+INSERT INTO `admin_menu` VALUES (1,0,1,'首页','fa-bar-chart','/',NULL,'2019-01-18 10:13:01'),(2,0,6,'系统管理','fa-tasks',NULL,NULL,'2019-02-01 06:41:58'),(3,2,7,'管理员','fa-users','auth/users',NULL,'2019-02-01 06:41:58'),(4,2,8,'角色','fa-user','auth/roles',NULL,'2019-02-01 06:41:58'),(5,2,9,'权限','fa-ban','auth/permissions',NULL,'2019-02-01 06:41:58'),(6,2,10,'菜单','fa-bars','auth/menu',NULL,'2019-02-01 06:41:58'),(7,2,11,'日志','fa-history','auth/logs',NULL,'2019-02-01 06:41:58'),(8,0,2,'用户管理','fa-users','/users','2019-01-18 10:28:43','2019-01-18 10:28:54'),(9,0,3,'商品管理','fa-cubes','/products','2019-01-21 01:37:59','2019-01-21 01:39:12'),(10,0,4,'订单管理','fa-rmb','/orders','2019-01-30 11:29:24','2019-01-30 11:29:44'),(11,0,5,'优惠券管理','fa-tags','/coupon_codes','2019-02-01 06:41:23','2019-02-01 06:41:58'),(12,9,0,'众筹商品','fa-cubes','/crowdfunding_products','2019-02-18 11:04:34','2019-02-18 11:04:34'),(13,9,0,'普通商品','fa-linux','/products','2019-02-18 11:05:39','2019-02-18 11:05:39'),(14,9,0,'秒杀产品','fa-bolt','/seckill_products','2019-03-27 10:41:39','2019-03-27 10:42:26');
 /*!40000 ALTER TABLE `admin_menu` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -103,4 +103,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-02-18 11:30:45
+-- Dump completed on 2019-03-27 10:57:25
